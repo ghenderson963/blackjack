@@ -31,20 +31,20 @@ def shuffle_decks!(total_decks)
   p total_decks
 end
 
-def initial_player_deal(total_decks, player_hand)
- card = total_decks.pop
- player_hand.push(card)
- card = total_decks.pop
- player_hand.push(card)
+# def initial_player_deal(total_decks, player_hand)
+#  card = total_decks.pop
+#  player_hand.push(card)
+#  card = total_decks.pop
+#  player_hand.push(card)
 
-end
+# end
 
-def initial_dealer_deal(total_decks,dealer_hand)
-  card = total_decks.pop
-  dealer_hand.push(card)
-  card = total_decks.pop
-  dealer_hand.push(card)
-end
+# def initial_dealer_deal(total_decks,dealer_hand)
+#   card = total_decks.pop
+#   dealer_hand.push(card)
+#   card = total_decks.pop
+#   dealer_hand.push(card)
+# end
 
 
 def deal_card!(total_decks,hand)
@@ -53,26 +53,30 @@ def deal_card!(total_decks,hand)
 end
 
 def announce_cards(player_hand,dealer_hand)
-    count = 0
+    count = 1
     puts " "
-      puts "You have a #{player_hand[0][1]} of #{player_hand[0][0]} and a #{player_hand[1][1]} of #{player_hand[1][0]} showing"
-binding.pry
+    puts "You have a:"
+
+    player_hand.each  do |card|
+      puts "#{card[count]} of #{card[0]}"
+      count =+ 1
+    end
+      # puts "#{player_hand[0][1]} of #{player_hand[0][0]} and a #{player_hand[1][1]} of #{player_hand[1][0]} showing"
 puts " "
       puts "The dealer has a #{dealer_hand[1][1]} of #{dealer_hand[1][0]} showing"
 
 end
 
-def ask_to_stay_or_hit(total_decks, hand)
-  begin
-  puts "Do you want to (S)tay or (H)it?"
-  player_call = gets.chomp.downcase
-  if player_call == "h"
-  deal_card!(total_decks,hand)
-  else
-  check_for_winner(hand)
-  end
-  end while player_call != "s"
-end
+# def ask_to_stay_or_hit(total_decks, hand)
+#   begin
+#   puts "Do you want to (S)tay or (H)it?"
+#   player_call = gets.chomp.downcase
+#   if player_call == "h"
+#   deal_card!(total_decks,hand)
+#   binding.pry
+#   end
+#   end while player_call != "s"
+# end
 
 
 
@@ -84,7 +88,6 @@ def count_up_cards(hand)
     current_value = card[1]
 
     if (current_value == "jack") ||  (current_value == "queen" )  ||  (current_value == "king") || (current_value== "ace")
-
       face_card_total = convert_face_cards_to_int(current_value, total)
       #hand.each { |card| total += card[1].to_i }
       total = total + face_card_total.to_i
@@ -94,6 +97,8 @@ def count_up_cards(hand)
     end
 
   end
+
+
   return total
   puts total
 end
@@ -125,32 +130,60 @@ def convert_face_cards_to_int(current_card,total)
   else
     if total > 21
       return 1
-      binding.pry
+
     else
       return 11
     end
   end
 end
 
+def dealer_turn(dealer_hand, dealer_total_count)
+  binding.pry
+  # case
+  # when dealer_hand
 
+end
 
+def check_for_blackjack_or_bust(player_total_count)
+  if player_total_count > 21
+   puts "Busted! You lose!"
+   return "s"
+  elsif player_total_count == 21
+    puts "Blackjack you win!"
+    return "s"
+  else
+    return "h"
+
+  end
+end
+
+def dealer_decide_stay_or_hit(dealer_total_count,dealer_hand)
+  case
+  when dealer_total_count <= 16
+    puts "The dealer hits!"
+    deal_card(dealer_hand)
+  when dealer_total_count > 16
+end
 
   # puts "You have a {player_hand["
 
 # def sum_hand(hand)
 #   hand_total =
 
-def check_for_winner(hand)
-  total = count_up_cards(hand)
-  p total
-  if total == '21'
-    put you win!
-  else
+def check_for_winner(player_total_count, dealer_total_count)
+  case
+  when (player_total_count > 21)
+    puts "Busted! You lose!"
+  when (dealer_total_count > 21)
+    puts "Dealer Busted!  You Win!"
+  when player_total_count > dealer_total_count
+    puts "You win!"
+  when dealer_total_count > player_total_count
+    puts "The dealer wins"
+   when
+      dealer_total_count == player_total_count
+    puts "No winners! BORING!"
   end
-
-
-
-
 end
 
 
@@ -162,12 +195,37 @@ total_decks = build_decks(number_of_decks)
 shuffle_decks!(total_decks)
 player_hand  = []
 dealer_hand = []
+dealer_total_count = 0
+player_total_count = 0
 deal_card!(total_decks,player_hand)
 deal_card!(total_decks,dealer_hand)
 deal_card!(total_decks,player_hand)
 deal_card!(total_decks, dealer_hand)
+announce_cards(player_hand, dealer_hand)
+# puts "Do you want to (S)tay or (H)it?"
+#   player_call = gets.chomp.downcase
+player_call = 0
+while player_call != "s"
 
+    puts "Do you want to (S)tay or (H)it?"
+    player_call = gets.chomp.downcase
+    if player_call == "h"
+      deal_card!(total_decks, player_hand)
+      announce_cards(player_hand, dealer_hand)
+      player_total_count = count_up_cards(player_hand)
+      player_call = check_for_blackjack_or_bust(player_total_count)
+    else
+    end
 
+end
+
+# ask_to_stay_or_hit(total_decks,player_hand)
+
+dealer_total_count = count_up_cards(dealer_hand)
+puts dealer_total_count
+dealer_decide_stay_or_hit(dealer_total_count, dealer_hand)
+
+check_for_winner(player_total_count, dealer_total_count)
 
 
 
@@ -175,11 +233,10 @@ deal_card!(total_decks, dealer_hand)
 # dealer_hand = []
 # initial_dealer_deal(total_decks,dealer_hand)
 
-announce_cards(player_hand, dealer_hand)
-ask_to_stay_or_hit(total_decks,player_hand)
 
-dealer_total_count = count_up_cards(dealer_hand)
-player_total_hand = count_up_cards(player_hand)
+
+
+
 
 
 # card_num = 0
