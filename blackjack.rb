@@ -54,10 +54,11 @@ end
 
 def announce_cards(player_hand,dealer_hand)
     count = 0
-    player_hand.each do |array|
-      puts "You have a #{array[count +1]} of #{array[count ]}"
-    end
-      puts "The dealer has a #{dealer_hand[1][0]} of #{dealer_hand[1][1]} "
+    puts " "
+      puts "You have a #{player_hand[0][1]} of #{player_hand[0][0]} and a #{player_hand[1][1]} of #{player_hand[1][0]} showing"
+binding.pry
+puts " "
+      puts "The dealer has a #{dealer_hand[1][1]} of #{dealer_hand[1][0]} showing"
 
 end
 
@@ -68,9 +69,9 @@ def ask_to_stay_or_hit(total_decks, hand)
   if player_call == "h"
   deal_card!(total_decks,hand)
   else
-  check_for_winner()
+  check_for_winner(hand)
   end
-  end while player_call == "s"
+  end while player_call != "s"
 end
 
 
@@ -81,20 +82,20 @@ def count_up_cards(hand)
   count = 0
   hand.each do |card|
     current_value = card[1]
-    binding.pry
+
     if (current_value == "jack") ||  (current_value == "queen" )  ||  (current_value == "king") || (current_value== "ace")
 
       face_card_total = convert_face_cards_to_int(current_value, total)
       #hand.each { |card| total += card[1].to_i }
-       binding.pry
       total = total + face_card_total.to_i
     else
       total = current_value .to_i+ total
-      binding.pry
+
     end
 
   end
   return total
+  puts total
 end
 
   # case total
@@ -124,6 +125,7 @@ def convert_face_cards_to_int(current_card,total)
   else
     if total > 21
       return 1
+      binding.pry
     else
       return 11
     end
@@ -138,7 +140,13 @@ end
 # def sum_hand(hand)
 #   hand_total =
 
-def check_for_winner()
+def check_for_winner(hand)
+  total = count_up_cards(hand)
+  p total
+  if total == '21'
+    put you win!
+  else
+  end
 
 
 
@@ -146,13 +154,26 @@ def check_for_winner()
 end
 
 
+
+
+
 number_of_decks = determine_number_of_decks
 total_decks = build_decks(number_of_decks)
 shuffle_decks!(total_decks)
 player_hand  = []
-initial_player_deal(total_decks,player_hand)
 dealer_hand = []
-initial_dealer_deal(total_decks,dealer_hand)
+deal_card!(total_decks,player_hand)
+deal_card!(total_decks,dealer_hand)
+deal_card!(total_decks,player_hand)
+deal_card!(total_decks, dealer_hand)
+
+
+
+
+
+# initial_player_deal(total_decks,player_hand)
+# dealer_hand = []
+# initial_dealer_deal(total_decks,dealer_hand)
 
 announce_cards(player_hand, dealer_hand)
 ask_to_stay_or_hit(total_decks,player_hand)
