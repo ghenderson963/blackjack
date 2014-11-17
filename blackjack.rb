@@ -18,15 +18,15 @@ def build_decks(number_of_decks)
     count = count + 1
   end
   total_deck.count
-return total_deck
+  return total_deck
 end
 
 def determine_number_of_decks
-begin
-puts "How many decks do you want to play with?  Enter a number 1 -4."
-number_of_decks = gets.chomp.to_i
-end while number_of_decks == 0
-return number_of_decks
+  begin
+    puts "How many decks do you want to play with?  Enter a number 1 -4."
+    number_of_decks = gets.chomp.to_i
+  end while number_of_decks == 0
+  return number_of_decks
 end
 
 def show_wait_cursor(seconds,fps=10)
@@ -49,27 +49,9 @@ def shuffle_decks!(total_decks)
   puts "Shuffling again!"
 end
 
-# def initial_player_deal(total_decks, player_hand)
-#  card = total_decks.pop
-#  player_hand.push(card)
-#  card = total_decks.pop
-#  player_hand.push(card)
-
-# end
-
-# def initial_dealer_deal(total_decks,dealer_hand)
-#   card = total_decks.pop
-#   dealer_hand.push(card)
-#   card = total_decks.pop
-#   dealer_hand.push(card)
-# end
-
-
 def deal_card!(total_decks,hand)
   number_of_cards = hand.length
   show_wait_cursor(0.5)
-
-
   hand[number_of_cards ] = total_decks.pop
 end
 
@@ -97,77 +79,29 @@ def announce_dealer_cards(hand)
 end
 
 def count_up_cards(hand)
+  card_vals = hand.map  { |card| card[1] }
   total = 0
-  count = 0
-  hand.each do |card|
-    current_value = card[1]
-    if (current_value == "jack") ||  (current_value == "queen" )  ||  (current_value == "king") || (current_value== "ace")
-      face_card_total = convert_face_cards_to_int(current_value, total)
-      total = total + face_card_total.to_i
+  card_vals.each do |value|
+    if value == "ace"
+      total += 11
+    elsif value.to_i == 0
+      total += 10
     else
-      total = current_value .to_i+ total
+      total += value.to_i
     end
   end
-  return total
-end
-
-def convert_face_cards_to_int(current_card,total)
-  if (current_card == "jack" ) || (current_card == "queen") || (current_card == "king")
-    current_card = 10
-    return current_card
-  elsif total > 21
-      return 1
-  else
-      return 11
+  card_vals.select { |card| card == "ace" }.count.times do
+    if total > 21
+      total -= 10
+    end
   end
-end
-
-def dealer_turn(dealer_hand, dealer_total_count)
-
-
-end
-
-def check_for_blackjack_or_bust(player_total_count)
-  if player_total_count > 21
-   puts "Busted! You lose!"
-   return "s"
-  elsif player_total_count == 21
-    puts "Blackjack you win!"
-    return "s"
-  else
-    return "h"
-  end
-end
-
-def dealer_decide_stay_or_hit(dealer_total_count,dealer_hand,total_decks)
-  case
-  when dealer_total_count <= 16
-    puts "The dealer hits!"
-    deal_card!(total_decks,dealer_hand)
-  when dealer_total_count > 16
-    puts "Dealer stays!"
-  when dealer_total_count == 21
-    puts "Dealer has blackjack!"
-  end
-end
-
-def check_for_winner(player_total_count, dealer_total_count)
-  case
-  when (player_total_count > 21)
-    puts "Busted! You lose!"
-  when (dealer_total_count > 21)
-    puts "Dealer Busted!  You Win!"
-  when player_total_count > dealer_total_count
-    puts "You win!"
-  when dealer_total_count > player_total_count
-    puts "The dealer wins"
-   when
-    dealer_total_count == player_total_count
-    puts "No winners! BORING!"
-  end
+  total
 end
 
 begin
+  dealer_hand = []
+  player_hand = []
+  total_decks = []
   puts "\e[H\e[2J"
   number_of_decks = determine_number_of_decks
   total_decks = build_decks(number_of_decks)
@@ -180,36 +114,94 @@ begin
   puts "dealing a card to you!"
   deal_card!(total_decks, dealer_hand)
   puts "dealing a card to the dealer"
+  dealer_total_count = count_up_cards(dealer_hand)
   player_total_count = count_up_cards(player_hand)
-  break if check_for_blackjack_or_bust(player_total_count) == 's'
   announce_player_cards(player_hand)
-  announce_dealer_cards(dealer_hand)
-  player_call = 0
-  while player_call != "s"
+  if player_total_count == 21
+    puts "Blackjack! You win!"
+    exit
+  end
+  while player_total_count < 21
+    announce_dealer_cards(dealer_hand)
+    announce_player_cards(player_hand)
+    puts "For a total of #{player_total_count}"
     puts "Do you want to (S)tay or (H)it?"
     player_call = gets.chomp.downcase
-    # puts "\e[H\e[2J"
-    if player_call == "h"
-      deal_card!(total_decks, player_hand)
-      check_for_blackjack_or_bust(player_total_count)
-      announce_player_cards(player_hand)
-      announce_dealer_cards(dealer_hand)
-      player_total_count = count_up_cards(player_hand)
-      player_call = check_for_blackjack_or_bust(player_total_count)
-    else
+    if !["h", "s"].include?(player_call)
+      puts "you must enter s or h"
+      next
     end
+    if player_call == "s"
+      puts "You choose to stay"
+      break
+    end
+    if player_total_count == 21
+      puts "Blackjack! you win!"
+      exit
+    elsif player_total_count > 21
+      puts "Busted! you loose!"
+      exit
+    end
+    deal_card!(total_decks, player_hand)
+    player_total_count = count_up_cards(player_hand)
+    announce_player_cards(player_hand)
+    announce_dealer_cards(dealer_hand)
+    puts "You have #{player_total_count}"
   end
-  dealer_total_count = count_up_cards(dealer_hand)
-  # puts dealer_total_count
-  announce_dealer_cards(dealer_hand)
-  dealer_decide_stay_or_hit(dealer_total_count, dealer_hand, total_decks)
-  announce_dealer_cards(dealer_hand)
-  dealer_total_count = count_up_cards(dealer_hand)
-  puts dealer_total_count
-  puts "For a total of: #{dealer_total_count}"
-  # check_for_winner(player_total_count, dealer_total_count)
-  puts "Do you want to play again? (y)es or (n)o"
-  play_again = gets.chomp.downcase
-end while play_again != "n"
+  if dealer_total_count == 21
+    puts "Dealer has Blackjack!"
+    exit
+  end
+  while dealer_total_count < 17
+    puts "The dealer hits!"
+    deal_card!(total_decks,dealer_hand)
+    announce_dealer_cards(dealer_hand)
+    dealer_total_count = count_up_cards(dealer_hand)
+    puts "Dealer total is #{dealer_total_count}"
+    if dealer_total_count == 21
+      puts "Dealer has Blackjack!  You lose."
+      break
+    elsif  dealer_total_count > 21
+      puts "Dealer has busted! You win."
+     break
+    end
+    puts "The dealer stays on a:"
+    announce_dealer_cards(dealer_hand)
+  end
+  if player_total_count > 21
+    announce_player_cards(player_hand)
+    puts "For a total of #{player_total_count}"
+    announce_dealer_cards(dealer_hand)
+    puts "For a total of #{dealer_total_count}"
+    puts "You Busted! Sorry you lose!"
+  elsif dealer_total_count > 21
+    announce_player_cards(player_hand)
+    puts "For a total of #{player_total_count}"
+    announce_dealer_cards(dealer_hand)
+    puts "For a total of #{dealer_total_count}"
+    puts "You win! The dealer busted!"
+  elsif player_total_count > dealer_total_count
+    announce_player_cards(player_hand)
+    puts "For a total of #{player_total_count}"
+    announce_dealer_cards(dealer_hand)
+    puts "For a total of #{dealer_total_count}"
+    puts "You Win!"
+  elsif player_total_count < dealer_total_count
+    announce_player_cards(player_hand)
+    puts "For a total of #{player_total_count}"
+    announce_dealer_cards(dealer_hand)
+    puts "For a total of #{dealer_total_count}"
+    puts "Dealer Wins!"
+  else player_total_count == dealer_total_count
+    announce_player_cards(player_hand)
+    puts "For a total of #{player_total_count}"
+    announce_dealer_cards(dealer_hand)
+    puts "For a total of #{dealer_total_count}"
+    puts "Tie so BORING!"
+  end
+  puts "Would you like to play again?  (Y)es or (N)o"
+  play_again = gets.chomp
+end while play_again == 'y'
+
 
 
